@@ -39,13 +39,13 @@ class TokenManager {
     return prefs.getString(_emailKey);
   }
 
-  /// Retorna 'GALLERY_ADMINISTRATOR' (Segmento 1) o 'TENANT' (Segmento 2)
+  /// Returns 'GALLERY_ADMINISTRATOR' (Target Segment 1) or 'TENANT' (Target Segment 2)
   Future<String> getRole() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_roleKey) ?? 'GALLERY_ADMINISTRATOR';
   }
 
-  /// Permite alternar el segmento activo para validar ambas vistas en la demo
+  /// Switches the active target segment role for UI preview and validation
   Future<void> setRole(String role) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_roleKey, role);
