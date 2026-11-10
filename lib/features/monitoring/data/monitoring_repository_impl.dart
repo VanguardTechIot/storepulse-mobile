@@ -2,7 +2,6 @@ import '../domain/consumption.dart';
 import '../domain/monitored_location.dart';
 import '../domain/monitoring_repository.dart';
 import '../domain/sensor_status.dart';
-import 'models/iot_device_dto.dart';
 import 'monitoring_service.dart';
 
 class MonitoringRepositoryImpl implements MonitoringRepository {
@@ -12,24 +11,21 @@ class MonitoringRepositoryImpl implements MonitoringRepository {
 
   @override
   Future<List<MonitoredLocation>> getLocations() async {
+    final monitored = await _monitoringService.fetchMonitoredResources();
     final resources = await _monitoringService.fetchResources();
-    List<IoTDeviceDto>? devices;
-    try {
-      devices = await _monitoringService.fetchIoTDevices();
-    } catch (_) {
-      devices = null;
-    }
-    return resources.map((resource) {
-      final device = devices
-          ?.where((d) => d.resourceId == resource.id && d.isActive)
-          .firstOrNull;
-      return MonitoredLocation(
-        resourceId: resource.id,
-        name: resource.name,
-        deviceId: device?.id,
-        deviceUnknown: devices == null,
-      );
-    }).toList();
+    final names = {
+      for (final resource in resources) resource.id: resource.name,
+    };
+    return monitored
+        .where((item) => names.containsKey(item.resourceId))
+        .map(
+          (item) => MonitoredLocation(
+            resourceId: item.resourceId,
+            name: names[item.resourceId]!,
+            hasDevice: item.deviceIds.isNotEmpty,
+          ),
+        )
+        .toList();
   }
 
   @override
@@ -40,8 +36,8 @@ class MonitoringRepositoryImpl implements MonitoringRepository {
   }
 
   @override
-  Future<List<SensorStatus>> getSensorStatus(int deviceId) async {
-    final items = await _monitoringService.fetchSensorStatus(deviceId);
+  Future<List<SensorStatus>> getSensorStatus(int resourceId) async {
+    final items = await _monitoringService.fetchSensorStatus(resourceId);
     return items.map((dto) => dto.toDomain()).toList();
   }
 }

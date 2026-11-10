@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/di/dependency_injection.dart';
 import '../../auth/data/token_manager.dart';
 import '../../dashboard_analytics/presentation/dashboard_page.dart';
+import '../../monitoring/presentation/monitoring_page.dart';
 import '../../subscriptions_payments/presentation/subscription_page.dart';
 
 class MainPage extends StatefulWidget {
@@ -45,6 +46,7 @@ class _MainPageState extends State<MainPage> {
         key: ValueKey('dashboard_$_currentRole'),
         currentRole: _currentRole,
       ),
+      MonitoringPage(key: ValueKey('monitoring_$_currentRole')),
       SubscriptionPage(
         key: ValueKey('subscriptions_$_currentRole'),
         currentRole: _currentRole,
@@ -134,6 +136,11 @@ class _MainPageState extends State<MainPage> {
               color: Color(0xFF0EA5E9),
             ),
             label: isAdmin ? 'Dashboard Galería' : 'Dashboard Local',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.sensors_outlined),
+            selectedIcon: Icon(Icons.sensors, color: Color(0xFF0EA5E9)),
+            label: 'Monitoreo',
           ),
           NavigationDestination(
             icon: const Icon(Icons.workspace_premium_outlined),

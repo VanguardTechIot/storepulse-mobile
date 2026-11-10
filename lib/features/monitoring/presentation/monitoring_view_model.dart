@@ -60,7 +60,7 @@ class MonitoringViewModel extends Cubit<MonitoringState> {
       selected.resourceId,
     );
     final sensors = selected.hasDevice
-        ? await _monitoringRepository.getSensorStatus(selected.deviceId!)
+        ? await _monitoringRepository.getSensorStatus(selected.resourceId)
         : <SensorStatus>[];
     emit(
       MonitoringLoaded(
