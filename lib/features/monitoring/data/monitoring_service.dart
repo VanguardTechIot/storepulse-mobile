@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../../../core/config/api_config.dart';
 import '../../auth/data/token_manager.dart';
 import 'models/consumption_dto.dart';
-import 'models/iot_device_dto.dart';
+import 'models/monitored_resource_dto.dart';
 import 'models/resource_dto.dart';
 import 'models/sensor_status_dto.dart';
 
@@ -19,9 +19,9 @@ class MonitoringService {
     return items.map(ResourceDto.fromJson).toList();
   }
 
-  Future<List<IoTDeviceDto>> fetchIoTDevices() async {
-    final items = await _getList('/iot-devices');
-    return items.map(IoTDeviceDto.fromJson).toList();
+  Future<List<MonitoredResourceDto>> fetchMonitoredResources() async {
+    final items = await _getList('/monitored-resources');
+    return items.map(MonitoredResourceDto.fromJson).toList();
   }
 
   Future<List<ConsumptionDto>> fetchConsumption(int resourceId) async {
@@ -29,8 +29,8 @@ class MonitoringService {
     return items.map(ConsumptionDto.fromJson).toList();
   }
 
-  Future<List<SensorStatusDto>> fetchSensorStatus(int deviceId) async {
-    final items = await _getList('/sensors/status?deviceId=$deviceId');
+  Future<List<SensorStatusDto>> fetchSensorStatus(int resourceId) async {
+    final items = await _getList('/sensors/status?resourceId=$resourceId');
     return items.map(SensorStatusDto.fromJson).toList();
   }
 

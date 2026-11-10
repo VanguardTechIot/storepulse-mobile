@@ -7,5 +7,5 @@ abstract class MonitoringRepository {
 
   Future<List<Consumption>> getConsumption(int resourceId);
 
-  Future<List<SensorStatus>> getSensorStatus(int deviceId);
+  Future<List<SensorStatus>> getSensorStatus(int resourceId);
 }

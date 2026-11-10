@@ -1,15 +1,11 @@
 class MonitoredLocation {
   final int resourceId;
   final String name;
-  final int? deviceId;
-  final bool deviceUnknown;
+  final bool hasDevice;
 
   const MonitoredLocation({
     required this.resourceId,
     required this.name,
-    this.deviceId,
-    this.deviceUnknown = false,
+    required this.hasDevice,
   });
-
-  bool get hasDevice => deviceId != null;
 }

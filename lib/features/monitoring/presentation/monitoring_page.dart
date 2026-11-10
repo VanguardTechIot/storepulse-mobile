@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../auth/data/token_manager.dart';
-import '../data/monitoring_repository_impl.dart';
-import '../data/monitoring_service.dart';
+import '../../../core/di/dependency_injection.dart';
 import '../domain/consumption.dart';
 import '../domain/monitored_location.dart';
 import '../domain/sensor_status.dart';
@@ -70,9 +68,7 @@ class MonitoringPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => MonitoringViewModel(
-        MonitoringRepositoryImpl(MonitoringService(TokenManager())),
-      )..load(),
+      create: (_) => getIt<MonitoringViewModel>()..load(),
       child: BlocBuilder<MonitoringViewModel, MonitoringState>(
         builder: (context, state) {
           if (state is MonitoringLoading || state is MonitoringInitial) {
@@ -106,13 +102,16 @@ class MonitoringPage extends StatelessWidget {
                 if (loaded.locations.isEmpty)
                   const _InfoCard(
                     icon: Icons.store_outlined,
-                    message: 'Aún no hay locales registrados.',
+                    message: 'Aún no tienes locales monitoreados.',
                   )
                 else ...[
-                  _LocationSelector(
-                    locations: loaded.locations,
-                    selected: loaded.selected,
-                  ),
+                  if (loaded.locations.length > 1)
+                    _LocationSelector(
+                      locations: loaded.locations,
+                      selected: loaded.selected,
+                    )
+                  else
+                    _LocationName(name: loaded.selected?.name ?? ''),
                   const SizedBox(height: 20),
                   _SectionTitle('Consumo del periodo'),
                   const SizedBox(height: 10),
@@ -222,6 +221,30 @@ class _LocationSelector extends StatelessWidget {
           context.read<MonitoringViewModel>().select(location);
         }
       },
+    );
+  }
+}
+
+class _LocationName extends StatelessWidget {
+  final String name;
+
+  const _LocationName({required this.name});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Icon(Icons.storefront, color: _primary),
+        const SizedBox(width: 8),
+        Text(
+          name,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: _title,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -341,12 +364,6 @@ class _SensorList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (location != null && location!.deviceUnknown) {
-      return const _InfoCard(
-        icon: Icons.sync_problem,
-        message: 'No se pudo consultar el dispositivo del local.',
-      );
-    }
     if (location == null || !location!.hasDevice) {
       return const _InfoCard(
         icon: Icons.sensors_off,
