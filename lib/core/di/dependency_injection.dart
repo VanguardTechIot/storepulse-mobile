@@ -8,6 +8,10 @@ import '../../features/dashboard_analytics/data/dashboard_repository_impl.dart';
 import '../../features/dashboard_analytics/data/dashboard_service.dart';
 import '../../features/dashboard_analytics/domain/dashboard_repository.dart';
 import '../../features/dashboard_analytics/presentation/dashboard_view_model.dart';
+import '../../features/monitoring/data/monitoring_repository_impl.dart';
+import '../../features/monitoring/data/monitoring_service.dart';
+import '../../features/monitoring/domain/monitoring_repository.dart';
+import '../../features/monitoring/presentation/monitoring_view_model.dart';
 import '../../features/subscriptions_payments/data/subscription_repository_impl.dart';
 import '../../features/subscriptions_payments/data/subscription_service.dart';
 import '../../features/subscriptions_payments/domain/subscription_repository.dart';
@@ -27,6 +31,9 @@ void setupDependencyInjection() {
   getIt.registerLazySingleton<SubscriptionService>(
     () => SubscriptionService(getIt<TokenManager>()),
   );
+  getIt.registerLazySingleton<MonitoringService>(
+    () => MonitoringService(getIt<TokenManager>()),
+  );
 
   // 3. Repositories
   getIt.registerLazySingleton<AuthRepository>(
@@ -38,6 +45,9 @@ void setupDependencyInjection() {
   getIt.registerLazySingleton<SubscriptionRepository>(
     () => SubscriptionRepositoryImpl(getIt<SubscriptionService>()),
   );
+  getIt.registerLazySingleton<MonitoringRepository>(
+    () => MonitoringRepositoryImpl(getIt<MonitoringService>()),
+  );
 
   // 4. ViewModels / Cubits
   getIt.registerFactory<LoginViewModel>(
@@ -48,6 +58,9 @@ void setupDependencyInjection() {
       getIt<DashboardRepository>(),
       getIt<TokenManager>(),
     ),
+  );
+  getIt.registerFactory<MonitoringViewModel>(
+    () => MonitoringViewModel(getIt<MonitoringRepository>()),
   );
   getIt.registerFactory<SubscriptionViewModel>(
     () => SubscriptionViewModel(
