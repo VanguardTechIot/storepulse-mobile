@@ -26,10 +26,12 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return BlocProvider(
       create: (_) => getIt<LoginViewModel>(),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8FAFC),
         body: BlocConsumer<LoginViewModel, LoginState>(
           listener: (context, state) {
             if (state is LoginSuccess) {
@@ -37,8 +39,11 @@ class _LoginPageState extends State<LoginPage> {
             } else if (state is LoginError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: const Color(0xFFEF4444),
+                  content: Text(
+                    state.message,
+                    style: TextStyle(color: colorScheme.onError),
+                  ),
+                  backgroundColor: colorScheme.error,
                 ),
               );
             }
@@ -55,68 +60,55 @@ class _LoginPageState extends State<LoginPage> {
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0F172A),
+                          color: colorScheme.primaryContainer,
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: const Column(
+                        child: Column(
                           children: [
                             Icon(
                               Icons.sensors,
                               size: 56,
-                              color: Color(0xFF0EA5E9),
+                              color: colorScheme.primary,
                             ),
-                            SizedBox(height: 12),
+                            const SizedBox(height: 12),
                             Text(
                               'StorePulse Mobile',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
+                              style: textTheme.headlineSmall?.copyWith(
+                                color: colorScheme.onPrimaryContainer,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(height: 4),
+                            const SizedBox(height: 4),
                             Text(
                               'Monitoreo IoT para Galerías Comerciales y Locales',
                               textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Color(0xFF94A3B8),
-                                fontSize: 13,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onPrimaryContainer,
                               ),
                             ),
                           ],
                         ),
                       ),
                       const SizedBox(height: 28),
-                      Card(
-                        elevation: 0,
-                        color: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          side: const BorderSide(color: Color(0xFFE2E8F0)),
-                        ),
+                      Card.outlined(
                         child: Padding(
                           padding: const EdgeInsets.all(20),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              const Text(
+                              Text(
                                 'Iniciar Sesión',
-                                style: TextStyle(
-                                  fontSize: 18,
+                                style: textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF0F172A),
                                 ),
                               ),
                               const SizedBox(height: 16),
                               TextField(
                                 controller: _emailController,
                                 keyboardType: TextInputType.emailAddress,
-                                decoration: InputDecoration(
+                                decoration: const InputDecoration(
                                   labelText: 'Correo electrónico',
-                                  prefixIcon: const Icon(Icons.email_outlined),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
+                                  prefixIcon: Icon(Icons.email_outlined),
                                 ),
                               ),
                               const SizedBox(height: 16),
@@ -138,46 +130,30 @@ class _LoginPageState extends State<LoginPage> {
                                       });
                                     },
                                   ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
                                 ),
                               ),
                               const SizedBox(height: 24),
                               SizedBox(
                                 height: 50,
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF0EA5E9),
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
+                                child: FilledButton(
                                   onPressed: state is LoginLoading
                                       ? null
                                       : () {
                                           context.read<LoginViewModel>().login(
-                                                _emailController.text,
-                                                _passwordController.text,
-                                              );
+                                            _emailController.text,
+                                            _passwordController.text,
+                                          );
                                         },
                                   child: state is LoginLoading
-                                      ? const SizedBox(
+                                      ? SizedBox(
                                           height: 22,
                                           width: 22,
                                           child: CircularProgressIndicator(
-                                            color: Colors.white,
+                                            color: colorScheme.onPrimary,
                                             strokeWidth: 2.5,
                                           ),
                                         )
-                                      : const Text(
-                                          'Ingresar a StorePulse',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
+                                      : const Text('Ingresar a StorePulse'),
                                 ),
                               ),
                               const SizedBox(height: 12),
@@ -192,7 +168,6 @@ class _LoginPageState extends State<LoginPage> {
                                 },
                                 child: const Text(
                                   '¿Eres Administrador de Galería nuevo? Regístrate',
-                                  style: TextStyle(color: Color(0xFF0EA5E9)),
                                 ),
                               ),
                             ],
