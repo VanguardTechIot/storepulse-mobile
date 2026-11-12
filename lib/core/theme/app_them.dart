@@ -10,7 +10,7 @@ abstract final class AppTheme {
   static ThemeData get light {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: _seed,
-      dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
+      primary: _seed,
     );
     return ThemeData(
       useMaterial3: true,
