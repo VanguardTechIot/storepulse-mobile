@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'core/di/dependency_injection.dart';
+import 'core/theme/app_them.dart';
 import 'features/auth/presentation/login_page.dart';
 import 'features/main/presentation/main_page.dart';
 
@@ -17,16 +18,7 @@ class StorePulseApp extends StatelessWidget {
     return MaterialApp(
       title: 'StorePulse Mobile',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0EA5E9),
-          primary: const Color(0xFF0EA5E9),
-          secondary: const Color(0xFF0F172A),
-          surface: const Color(0xFFF8FAFC),
-        ),
-        scaffoldBackgroundColor: const Color(0xFFF8FAFC),
-      ),
+      theme: AppTheme.light,
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginPage(),
