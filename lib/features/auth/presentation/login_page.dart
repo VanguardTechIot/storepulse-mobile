@@ -98,6 +98,7 @@ class _LoginPageState extends State<LoginPage> {
                             children: [
                               Text(
                                 'Iniciar Sesión',
+                                textAlign: TextAlign.center,
                                 style: textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
