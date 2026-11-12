@@ -8,8 +8,10 @@ abstract final class AppTheme {
   static const Color _seed = Color(0xFF0EA5E9);
 
   static ThemeData get light {
-    final colorScheme = ColorScheme.fromSeed(seedColor: _seed);
-
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: _seed,
+      dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
+    );
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
