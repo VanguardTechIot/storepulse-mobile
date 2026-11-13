@@ -26,14 +26,12 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return BlocProvider(
       create: (_) => getIt<LoginViewModel>(),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8FAFC),
         appBar: AppBar(
           title: const Text('Registro de Administrador de Galería'),
-          backgroundColor: const Color(0xFF0F172A),
-          foregroundColor: Colors.white,
         ),
         body: BlocConsumer<LoginViewModel, LoginState>(
           listener: (context, state) {
@@ -46,8 +44,11 @@ class _RegisterPageState extends State<RegisterPage> {
             } else if (state is LoginError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: const Color(0xFFEF4444),
+                  content: Text(
+                    state.message,
+                    style: TextStyle(color: colorScheme.onError),
+                  ),
+                  backgroundColor: colorScheme.error,
                 ),
               );
             }
@@ -60,60 +61,46 @@ class _RegisterPageState extends State<RegisterPage> {
                 children: [
                   TextField(
                     controller: _nameController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Nombre completo',
-                      prefixIcon: const Icon(Icons.person_outline),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      prefixIcon: Icon(Icons.person_outline),
                     ),
                   ),
                   const SizedBox(height: 16),
                   TextField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Correo electrónico corporativo',
-                      prefixIcon: const Icon(Icons.email_outlined),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      prefixIcon: Icon(Icons.email_outlined),
                     ),
                   ),
                   const SizedBox(height: 16),
                   TextField(
                     controller: _passwordController,
                     obscureText: true,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Contraseña',
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      prefixIcon: Icon(Icons.lock_outline),
                     ),
                   ),
                   const SizedBox(height: 24),
                   SizedBox(
                     height: 50,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0EA5E9),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
+                    child: FilledButton(
                       onPressed: state is LoginLoading
                           ? null
                           : () {
                               context.read<LoginViewModel>().register(
-                                    _nameController.text,
-                                    _emailController.text,
-                                    _passwordController.text,
-                                  );
+                                _nameController.text,
+                                _emailController.text,
+                                _passwordController.text,
+                              );
                             },
                       child: state is LoginLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
+                          ? CircularProgressIndicator(
+                              color: colorScheme.onPrimary,
+                            )
                           : const Text('Crear cuenta de Administrador'),
                     ),
                   ),
