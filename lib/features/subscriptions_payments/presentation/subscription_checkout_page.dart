@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../domain/subscription_plan.dart';
+import '../../../core/theme/status_colors.dart';
 
 class SubscriptionCheckoutResult {
   final int galleryId;
@@ -67,14 +68,15 @@ class _SubscriptionCheckoutPageState extends State<SubscriptionCheckoutPage> {
     final price = _billingCycle == 'ANNUAL'
         ? widget.plan.annualPrice
         : widget.plan.monthlyPrice;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final statusColors = Theme.of(context).extension<StatusColors>()!;
+    final sectionTitleStyle = textTheme.titleSmall?.copyWith(
+      fontWeight: FontWeight.bold,
+    );
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        title: Text('Contratar Plan ${widget.plan.code}'),
-        backgroundColor: const Color(0xFF0F172A),
-        foregroundColor: Colors.white,
-      ),
+      appBar: AppBar(title: Text('Contratar Plan ${widget.plan.code}')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -83,7 +85,7 @@ class _SubscriptionCheckoutPageState extends State<SubscriptionCheckoutPage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF0F172A),
+                color: colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Column(
@@ -91,27 +93,24 @@ class _SubscriptionCheckoutPageState extends State<SubscriptionCheckoutPage> {
                 children: [
                   Text(
                     'PLAN ${widget.plan.code}',
-                    style: const TextStyle(
-                      color: Color(0xFF0EA5E9),
+                    style: textTheme.labelLarge?.copyWith(
+                      color: colorScheme.primary,
                       fontWeight: FontWeight.bold,
-                      fontSize: 13,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '${widget.plan.currency} ${price.toStringAsFixed(2)} / ${_billingCycle == 'ANNUAL' ? 'año' : 'mes'}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
+                    style: textTheme.headlineSmall?.copyWith(
+                      color: colorScheme.onPrimaryContainer,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     widget.plan.capacityLabel,
-                    style: const TextStyle(
-                      color: Color(0xFF94A3B8),
-                      fontSize: 12,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onPrimaryContainer,
                     ),
                   ),
                 ],
@@ -121,11 +120,8 @@ class _SubscriptionCheckoutPageState extends State<SubscriptionCheckoutPage> {
             TextField(
               controller: _galleryIdController,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'ID de la Galería Comercial',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
               ),
             ),
             const SizedBox(height: 14),
@@ -135,19 +131,10 @@ class _SubscriptionCheckoutPageState extends State<SubscriptionCheckoutPage> {
               decoration: InputDecoration(
                 labelText: 'Cantidad de Locales Comerciales a Monitorear',
                 helperText: widget.plan.capacityLabel,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Ciclo de Facturación',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF0F172A),
-              ),
-            ),
+            Text('Ciclo de Facturación', style: sectionTitleStyle),
             const SizedBox(height: 8),
             SegmentedButton<String>(
               segments: const [
@@ -170,21 +157,11 @@ class _SubscriptionCheckoutPageState extends State<SubscriptionCheckoutPage> {
               },
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Método de Pago',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF0F172A),
-              ),
-            ),
+            Text('Método de Pago', style: sectionTitleStyle),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               initialValue: _paymentMethod,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+              decoration: const InputDecoration(),
               items: const [
                 DropdownMenuItem(
                   value: 'CARD',
@@ -210,35 +187,26 @@ class _SubscriptionCheckoutPageState extends State<SubscriptionCheckoutPage> {
               TextField(
                 controller: _cardNumberController,
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Número de Tarjeta (16 dígitos)',
                   hintText: '4557880011223344',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
                 ),
               ),
               const SizedBox(height: 14),
               TextField(
                 controller: _cardExpiryController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Vencimiento (MM/YY)',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
                 ),
               ),
             ],
             const SizedBox(height: 24),
             SizedBox(
               height: 50,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF10B981),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+              child: FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: statusColors.success,
+                  foregroundColor: colorScheme.onPrimary,
                 ),
                 onPressed: () {
                   final galleryId =
