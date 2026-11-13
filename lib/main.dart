@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/di/dependency_injection.dart';
 import 'core/router/app_routes.dart';
+import 'core/theme/app_theme.dart';
 import 'features/iam/domain/password_recovery.dart';
 import 'features/iam/presentation/forgot_password_page.dart';
 import 'features/iam/presentation/reset_password_page.dart';
@@ -47,16 +48,7 @@ class _StorePulseAppState extends State<StorePulseApp> {
         title: 'StorePulse Mobile',
         debugShowCheckedModeBanner: false,
         navigatorKey: _navigatorKey,
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF0EA5E9),
-            primary: const Color(0xFF0EA5E9),
-            secondary: const Color(0xFF0F172A),
-            surface: const Color(0xFFF8FAFC),
-          ),
-          scaffoldBackgroundColor: const Color(0xFFF8FAFC),
-        ),
+        theme: AppTheme.light,
         builder: (context, child) =>
             BlocListener<SessionViewModel, SessionState>(
               listenWhen: (previous, current) =>
