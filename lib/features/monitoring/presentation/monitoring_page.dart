@@ -1,20 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/di/dependency_injection.dart';
+import '../../../core/theme/status_colors.dart';
 import '../domain/consumption.dart';
 import '../domain/monitored_location.dart';
 import '../domain/sensor_status.dart';
 import 'monitoring_state.dart';
 import 'monitoring_view_model.dart';
-
-const _primary = Color(0xFF0EA5E9);
-const _title = Color(0xFF0F172A);
-const _text = Color(0xFF334155);
-const _muted = Color(0xFF64748B);
-const _border = Color(0xFFE2E8F0);
-const _danger = Color(0xFFEF4444);
-const _success = Color(0xFF10B981);
-const _warning = Color(0xFFF59E0B);
 
 const _months = [
   'Enero',
@@ -72,9 +64,7 @@ class MonitoringPage extends StatelessWidget {
       child: BlocBuilder<MonitoringViewModel, MonitoringState>(
         builder: (context, state) {
           if (state is MonitoringLoading || state is MonitoringInitial) {
-            return const Center(
-              child: CircularProgressIndicator(color: _primary),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (state is MonitoringError) {
@@ -85,18 +75,15 @@ class MonitoringPage extends StatelessWidget {
           final now = DateTime.now();
 
           return RefreshIndicator(
-            color: _primary,
             onRefresh: () => context.read<MonitoringViewModel>().refresh(),
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                const Text(
+                Text(
                   'Monitoreo del local',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: _title,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
                 if (loaded.locations.isEmpty)
@@ -152,15 +139,15 @@ class _ErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: _danger),
-            const SizedBox(height: 12),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: _text),
+            Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Theme.of(context).colorScheme.error,
             ),
+            const SizedBox(height: 12),
+            Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 16),
-            ElevatedButton.icon(
+            FilledButton.icon(
               onPressed: () => context.read<MonitoringViewModel>().load(),
               icon: const Icon(Icons.refresh),
               label: const Text('Reintentar'),
@@ -181,11 +168,9 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: _title,
-      ),
+      style: Theme.of(
+        context,
+      ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
     );
   }
 }
@@ -202,8 +187,10 @@ class _LocationSelector extends StatelessWidget {
       initialValue: selected?.resourceId,
       decoration: InputDecoration(
         labelText: 'Local',
-        prefixIcon: const Icon(Icons.storefront, color: _primary),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        prefixIcon: Icon(
+          Icons.storefront,
+          color: Theme.of(context).colorScheme.primary,
+        ),
       ),
       items: locations
           .map(
@@ -234,15 +221,13 @@ class _LocationName extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Icon(Icons.storefront, color: _primary),
+        Icon(Icons.storefront, color: Theme.of(context).colorScheme.primary),
         const SizedBox(width: 8),
         Text(
           name,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: _title,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
       ],
     );
@@ -257,6 +242,8 @@ class _CurrentConsumption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final statusColors = Theme.of(context).extension<StatusColors>()!;
     final current = state.currentPeriod(now);
     Consumption? ofType(String type) =>
         current.where((c) => c.measurementType == type).firstOrNull;
@@ -272,7 +259,7 @@ class _CurrentConsumption extends StatelessWidget {
             decimals: 1,
             lastReading: state.lastReadingOf('ELECTRICITY'),
             icon: Icons.bolt,
-            accent: _warning,
+            accent: statusColors.warning,
           ),
         ),
         const SizedBox(width: 12),
@@ -284,7 +271,7 @@ class _CurrentConsumption extends StatelessWidget {
             decimals: 2,
             lastReading: state.lastReadingOf('WATER'),
             icon: Icons.water_drop,
-            accent: _primary,
+            accent: colorScheme.primary,
           ),
         ),
       ],
@@ -314,12 +301,9 @@ class _ConsumptionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final value = consumption;
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: _border),
-      ),
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    return Card.outlined(
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
@@ -327,17 +311,20 @@ class _ConsumptionCard extends StatelessWidget {
           children: [
             Icon(icon, color: accent),
             const SizedBox(height: 8),
-            Text(label, style: const TextStyle(color: _muted, fontSize: 13)),
+            Text(
+              label,
+              style: textTheme.labelLarge?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
             const SizedBox(height: 4),
             Text(
               value == null
                   ? 'Sin lecturas'
                   : '${value.totalValue.toStringAsFixed(decimals)} '
                         '${value.unit.isEmpty ? fallbackUnit : value.unit}',
-              style: const TextStyle(
-                fontSize: 20,
+              style: textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: _title,
               ),
             ),
             const SizedBox(height: 6),
@@ -347,7 +334,9 @@ class _ConsumptionCard extends StatelessWidget {
                   : lastReading == null
                   ? 'Última lectura no disponible'
                   : 'Última lectura: ${_formatDateTime(lastReading!)}',
-              style: const TextStyle(color: _muted, fontSize: 12),
+              style: textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -376,12 +365,7 @@ class _SensorList extends StatelessWidget {
         message: 'El dispositivo aún no envía lecturas.',
       );
     }
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: _border),
-      ),
+    return Card.outlined(
       child: Column(
         children: sensors.map((sensor) => _SensorTile(sensor: sensor)).toList(),
       ),
@@ -399,24 +383,27 @@ class _SensorTile extends StatelessWidget {
     final reading = sensor.isMotion
         ? (sensor.motionDetected ? 'Movimiento detectado' : 'Sin movimiento')
         : '${sensor.value.toStringAsFixed(1)} ${sensor.unit}';
+    final colorScheme = Theme.of(context).colorScheme;
     return ListTile(
       leading: Icon(
         _sensorIcon(sensor.type),
-        color: sensor.motionDetected ? _danger : _primary,
+        color: sensor.motionDetected ? colorScheme.error : colorScheme.primary,
       ),
       title: Text(
         _sensorLabel(sensor.type),
-        style: const TextStyle(fontWeight: FontWeight.w600, color: _title),
+        style: const TextStyle(fontWeight: FontWeight.w600),
       ),
       subtitle: Text(
         _formatDateTime(sensor.recordedAt),
-        style: const TextStyle(color: _muted, fontSize: 12),
+        style: Theme.of(context).textTheme.bodySmall,
       ),
       trailing: Text(
         reading,
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          color: sensor.motionDetected ? _danger : _text,
+          color: sensor.motionDetected
+              ? colorScheme.error
+              : colorScheme.onSurface,
         ),
       ),
     );
@@ -430,28 +417,26 @@ class _ConsumptionHistory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: _border),
-      ),
+    final colorScheme = Theme.of(context).colorScheme;
+    final statusColors = Theme.of(context).extension<StatusColors>()!;
+
+    return Card.outlined(
       child: Column(
         children: items.map((item) {
           final isElectricity = item.measurementType == 'ELECTRICITY';
           return ListTile(
             leading: Icon(
               isElectricity ? Icons.bolt : Icons.water_drop,
-              color: isElectricity ? _warning : _primary,
+              color: isElectricity ? statusColors.warning : colorScheme.primary,
             ),
-            title: Text(
-              _formatPeriod(item.periodStart),
-              style: const TextStyle(color: _title),
-            ),
+            title: Text(_formatPeriod(item.periodStart)),
             trailing: Text(
               '${item.totalValue.toStringAsFixed(isElectricity ? 1 : 2)} '
               '${item.unit}',
-              style: const TextStyle(fontWeight: FontWeight.bold, color: _text),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onSurface,
+              ),
             ),
           );
         }).toList(),
@@ -468,21 +453,16 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: _border),
-      ),
+    final statusColors = Theme.of(context).extension<StatusColors>()!;
+
+    return Card.outlined(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(icon, color: _success),
+            Icon(icon, color: statusColors.success),
             const SizedBox(width: 12),
-            Expanded(
-              child: Text(message, style: const TextStyle(color: _text)),
-            ),
+            Expanded(child: Text(message)),
           ],
         ),
       ),
