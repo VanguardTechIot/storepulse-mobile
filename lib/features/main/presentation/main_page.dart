@@ -64,23 +64,23 @@ class _MainPageState extends State<MainPage> {
       ),
     ];
 
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F172A),
-        foregroundColor: Colors.white,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'StorePulse IoT',
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             Text(
               isAdmin
                   ? 'Segmento 1: Administrador de Galería'
                   : 'Segmento 2: Inquilino de Local Comercial',
-              style: const TextStyle(fontSize: 11, color: Color(0xFF38BDF8)),
+              style: textTheme.labelSmall?.copyWith(color: colorScheme.primary),
             ),
           ],
         ),
@@ -100,28 +100,23 @@ class _MainPageState extends State<MainPage> {
       body: pages[_selectedIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
-        backgroundColor: Colors.white,
-        indicatorColor: const Color(0xFFE0F2FE),
         onDestinationSelected: (index) {
           setState(() => _selectedIndex = index);
         },
         destinations: [
           NavigationDestination(
             icon: const Icon(Icons.analytics_outlined),
-            selectedIcon: const Icon(Icons.analytics, color: Color(0xFF0EA5E9)),
+            selectedIcon: const Icon(Icons.analytics),
             label: isAdmin ? 'Dashboard Galería' : 'Dashboard Local',
           ),
           const NavigationDestination(
             icon: Icon(Icons.sensors_outlined),
-            selectedIcon: Icon(Icons.sensors, color: Color(0xFF0EA5E9)),
+            selectedIcon: Icon(Icons.sensors),
             label: 'Monitoreo',
           ),
           NavigationDestination(
             icon: const Icon(Icons.workspace_premium_outlined),
-            selectedIcon: const Icon(
-              Icons.workspace_premium,
-              color: Color(0xFF0EA5E9),
-            ),
+            selectedIcon: const Icon(Icons.workspace_premium),
             label: isAdmin ? 'Suscripción y Pagos' : 'Cobertura IoT',
           ),
         ],
