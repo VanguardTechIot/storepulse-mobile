@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'status_colors.dart';
 
 /// Material 3 theme of StorePulse Mobile, generated from a single seed color.
-
 abstract final class AppTheme {
 
   static const Color _seed = Color(0xFF0EA5E9);

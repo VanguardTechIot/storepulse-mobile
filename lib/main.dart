@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'core/di/dependency_injection.dart';
-import 'core/theme/app_them.dart';
+import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/login_page.dart';
 import 'features/main/presentation/main_page.dart';
 
