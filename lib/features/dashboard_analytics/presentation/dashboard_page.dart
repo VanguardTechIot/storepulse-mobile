@@ -239,24 +239,28 @@ class _GalleryAdminDashboardView extends StatelessWidget {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 6),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  _sensorIcon(entry.key),
-                                  color: colorScheme.primary,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  _sensorLabel(entry.key),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    _sensorIcon(entry.key),
+                                    color: colorScheme.primary,
+                                    size: 20,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      _sensorLabel(entry.key),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
+                            const SizedBox(width: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 10,
