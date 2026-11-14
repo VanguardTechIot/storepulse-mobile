@@ -174,9 +174,9 @@ class _TenantSubscriptionCoverageView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sub = loaded.currentSubscription;
-    final plan =
-        loaded.activePlan ??
-        (loaded.plans.isNotEmpty ? loaded.plans.first : null);
+    final activePlan = loaded.activePlan;
+    final displayPlan =
+        activePlan ?? (loaded.plans.isNotEmpty ? loaded.plans.first : null);
     final isCovered = sub == null || sub.isActive;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
@@ -222,8 +222,8 @@ class _TenantSubscriptionCoverageView extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                plan != null
-                    ? 'Respaldado por Plan ${plan.code} de la Galería'
+                sub != null && activePlan != null
+                    ? 'Respaldado por Plan ${activePlan.code} de la Galería'
                     : 'Servicio de Telemetría StorePulse',
                 style: textTheme.titleLarge?.copyWith(
                   color: colorScheme.onPrimaryContainer,
@@ -248,8 +248,8 @@ class _TenantSubscriptionCoverageView extends StatelessWidget {
           style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
-        if (plan != null)
-          ...plan.features.map(
+        if (displayPlan != null)
+          ...displayPlan.features.map(
             (feature) => Card.outlined(
               margin: const EdgeInsets.only(bottom: 8),
               child: ListTile(

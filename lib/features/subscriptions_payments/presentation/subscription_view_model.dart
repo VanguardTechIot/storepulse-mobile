@@ -21,8 +21,10 @@ class SubscriptionViewModel extends Cubit<SubscriptionState> {
       }
 
       final plans = await _repository.getPlans();
-      final subscription =
-          await _repository.getSubscriptionByGallery(galleryId);
+      final isGalleryAdmin = role == 'GALLERY_ADMINISTRATOR';
+      final subscription = isGalleryAdmin
+          ? await _repository.getSubscriptionByGallery(galleryId)
+          : null;
 
       var payments = <Payment>[];
       if (subscription != null) {
