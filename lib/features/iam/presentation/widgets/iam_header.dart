@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 class IamHeader extends StatelessWidget {
   final String title;
   final String subtitle;
-  final IconData icon;
+  final IconData? icon;
 
   const IamHeader({
     super.key,
     required this.title,
     required this.subtitle,
-    this.icon = Icons.sensors,
+    this.icon,
   });
 
   @override
@@ -19,12 +19,21 @@ class IamHeader extends StatelessWidget {
 
     return Column(
       children: [
-        CircleAvatar(
-          radius: 36,
-          backgroundColor: colorScheme.primaryContainer,
-          foregroundColor: colorScheme.onPrimaryContainer,
-          child: Icon(icon, size: 40),
-        ),
+        if (icon != null)
+          CircleAvatar(
+            radius: 36,
+            backgroundColor: colorScheme.primaryContainer,
+            foregroundColor: colorScheme.onPrimaryContainer,
+            child: Icon(icon, size: 40),
+          )
+        else
+          Image.asset(
+            'assets/images/storepulse_logo.png',
+            width: 84,
+            height: 84,
+            fit: BoxFit.contain,
+            semanticLabel: 'Logo de StorePulse',
+          ),
         const SizedBox(height: 16),
         Text(
           title,
