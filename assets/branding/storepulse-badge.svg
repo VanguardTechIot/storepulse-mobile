@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" fill="none">
+  <defs>
+    <linearGradient id="sp-bg-grad" x1="256" y1="0" x2="256" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#111C38" />
+      <stop offset="100%" stop-color="#0A0F1D" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#sp-bg-grad)" />
+  <rect x="2" y="2" width="508" height="508" rx="114" stroke="#1E293B" stroke-width="3" opacity="0.6" />
+  <defs>
+    <linearGradient id="sp-pulse-badge" x1="108" y1="316" x2="404" y2="316" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="50%" stop-color="#0EA5E9" />
+      <stop offset="100%" stop-color="#38BDF8" />
+    </linearGradient>
+    <mask id="sp-badge-pulse" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+      <rect x="0" y="0" width="512" height="512" fill="white" />
+      <path d="M 108 316 L 192 316 L 224 232 L 262 396 L 298 266 L 326 316 L 404 316"
+            stroke="black" stroke-width="44" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+    </mask>
+    <mask id="sp-badge-sensor" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+      <rect x="0" y="0" width="512" height="512" fill="white" />
+      <circle cx="256" cy="122" r="6" fill="black" />
+    </mask>
+    <mask id="sp-badge-roof" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+      <rect x="0" y="0" width="512" height="512" fill="white" />
+      <circle cx="256" cy="122" r="22" fill="black" />
+    </mask>
+  </defs>
+  <g transform="translate(256 266) scale(0.92) translate(-256 -256)">
+    <g mask="url(#sp-badge-pulse)">
+      <line x1="164" y1="230" x2="164" y2="376" stroke="#94A3B8" stroke-width="26" stroke-linecap="round" />
+      <line x1="348" y1="230" x2="348" y2="376" stroke="#94A3B8" stroke-width="26" stroke-linecap="round" />
+      <path d="M 136 214 L 256 122 L 376 214" stroke="#F8FAFC" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" mask="url(#sp-badge-roof)" />
+    </g>
+    <g stroke="#38BDF8" stroke-width="5" stroke-linecap="round" opacity="0.95">
+      <line x1="256" y1="78" x2="256" y2="88" />
+      <line x1="287" y1="91" x2="280" y2="98" />
+      <line x1="300" y1="122" x2="290" y2="122" />
+      <line x1="225" y1="91" x2="232" y2="98" />
+      <line x1="212" y1="122" x2="222" y2="122" />
+    </g>
+    <circle cx="256" cy="122" r="28" stroke="#38BDF8" stroke-width="6" stroke-dasharray="4 6" />
+    <circle cx="256" cy="122" r="16" fill="#38BDF8" mask="url(#sp-badge-sensor)" />
+    <path d="M 108 316 L 192 316 L 224 232 L 262 396 L 298 266 L 326 316 L 404 316"
+          stroke="url(#sp-pulse-badge)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+</svg>
