@@ -69,18 +69,37 @@ class _MainPageState extends State<MainPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
           children: [
-            Text(
-              'StorePulse IoT',
-              style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            Image.asset(
+              'assets/images/storepulse_logo.png',
+              width: 30,
+              height: 30,
+              fit: BoxFit.contain,
+              semanticLabel: 'Logo de StorePulse',
             ),
-            Text(
-              isAdmin
-                  ? 'Segmento 1: Administrador de Galería'
-                  : 'Segmento 2: Inquilino de Local Comercial',
-              style: textTheme.labelSmall?.copyWith(color: colorScheme.primary),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'StorePulse IoT',
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    isAdmin
+                        ? 'Segmento 1: Administrador de Galería'
+                        : 'Segmento 2: Inquilino de Local Comercial',
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.labelSmall?.copyWith(
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
