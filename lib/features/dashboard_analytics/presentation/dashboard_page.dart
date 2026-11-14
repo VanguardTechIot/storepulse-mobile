@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/di/dependency_injection.dart';
+import '../../../core/theme/status_colors.dart';
 import '../domain/dashboard_summary.dart';
 import 'dashboard_state.dart';
 import 'dashboard_view_model.dart';
@@ -8,10 +9,7 @@ import 'dashboard_view_model.dart';
 class DashboardPage extends StatelessWidget {
   final String currentRole;
 
-  const DashboardPage({
-    super.key,
-    required this.currentRole,
-  });
+  const DashboardPage({super.key, required this.currentRole});
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +18,7 @@ class DashboardPage extends StatelessWidget {
       child: BlocBuilder<DashboardViewModel, DashboardState>(
         builder: (context, state) {
           if (state is DashboardLoading || state is DashboardInitial) {
-            return const Center(
-              child: CircularProgressIndicator(color: Color(0xFF0EA5E9)),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (state is DashboardError) {
@@ -32,19 +28,15 @@ class DashboardPage extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.error_outline,
                       size: 48,
-                      color: Color(0xFFEF4444),
+                      color: Theme.of(context).colorScheme.error,
                     ),
                     const SizedBox(height: 12),
-                    Text(
-                      state.message,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Color(0xFF334155)),
-                    ),
+                    Text(state.message, textAlign: TextAlign.center),
                     const SizedBox(height: 16),
-                    ElevatedButton.icon(
+                    FilledButton.icon(
                       onPressed: () =>
                           context.read<DashboardViewModel>().loadSummary(),
                       icon: const Icon(Icons.refresh),
@@ -60,7 +52,6 @@ class DashboardPage extends StatelessWidget {
           final isAdmin = currentRole == 'GALLERY_ADMINISTRATOR';
 
           return RefreshIndicator(
-            color: const Color(0xFF0EA5E9),
             onRefresh: () => context.read<DashboardViewModel>().loadSummary(),
             child: ListView(
               padding: const EdgeInsets.all(16),
@@ -87,13 +78,16 @@ class _SegmentBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isGalleryAdmin
-              ? [const Color(0xFF0F172A), const Color(0xFF1E293B)]
-              : [const Color(0xFF0369A1), const Color(0xFF0EA5E9)],
+              ? [colorScheme.primaryContainer, colorScheme.secondaryContainer]
+              : [colorScheme.tertiaryContainer, colorScheme.primaryContainer],
         ),
         borderRadius: BorderRadius.circular(16),
       ),
@@ -102,12 +96,12 @@ class _SegmentBanner extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.14),
+              color: colorScheme.surface.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               isGalleryAdmin ? Icons.domain : Icons.storefront,
-              color: Colors.white,
+              color: colorScheme.primary,
               size: 28,
             ),
           ),
@@ -120,9 +114,8 @@ class _SegmentBanner extends StatelessWidget {
                   isGalleryAdmin
                       ? 'SEGMENTO 1 · ADMINISTRADOR DE GALERÍA'
                       : 'SEGMENTO 2 · INQUILINO DE LOCAL COMERCIAL',
-                  style: const TextStyle(
-                    color: Color(0xFF7DD3FC),
-                    fontSize: 11,
+                  style: textTheme.labelSmall?.copyWith(
+                    color: colorScheme.primary,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.6,
                   ),
@@ -132,9 +125,8 @@ class _SegmentBanner extends StatelessWidget {
                   isGalleryAdmin
                       ? 'Dashboard Consolidado Multi-Local'
                       : 'Estado Operativo y Consumo de Mi Local',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 17,
+                  style: textTheme.titleMedium?.copyWith(
+                    color: colorScheme.onPrimaryContainer,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -143,9 +135,8 @@ class _SegmentBanner extends StatelessWidget {
                   isGalleryAdmin
                       ? 'Supervisión global de alertas críticas y servicios de toda la galería.'
                       : 'Monitoreo preventivo 24/7 de tu mercadería y consumo eléctrico/agua.',
-                  style: const TextStyle(
-                    color: Color(0xFFE2E8F0),
-                    fontSize: 12,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onPrimaryContainer,
                   ),
                 ),
               ],
@@ -169,17 +160,19 @@ class _GalleryAdminDashboardView extends StatelessWidget {
   Widget build(BuildContext context) {
     final alerts = summary.alerts;
     final consumption = summary.consumption;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final statusColors = Theme.of(context).extension<StatusColors>()!;
+    final sectionTitleStyle = textTheme.titleMedium?.copyWith(
+      fontWeight: FontWeight.bold,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Estado Global de Alertas en la Galería',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF0F172A),
-          ),
+          style: sectionTitleStyle,
         ),
         const SizedBox(height: 10),
         GridView.count(
@@ -194,60 +187,49 @@ class _GalleryAdminDashboardView extends StatelessWidget {
               title: 'Alertas Abiertas',
               value: '${alerts.open}',
               subtitle: 'Requieren atención',
-              color: const Color(0xFFEF4444),
+              color: colorScheme.error,
               icon: Icons.warning_amber_rounded,
             ),
             _MetricCard(
               title: 'Activas Sin Atender',
               value: '${alerts.active}',
               subtitle: 'En estado crítico',
-              color: const Color(0xFFF59E0B),
+              color: statusColors.warning,
               icon: Icons.notifications_active_outlined,
             ),
             _MetricCard(
               title: 'Reconocidas',
               value: '${alerts.acknowledged}',
               subtitle: 'En revisión técnica',
-              color: const Color(0xFF3B82F6),
+              color: statusColors.info,
               icon: Icons.visibility_outlined,
             ),
             _MetricCard(
               title: 'Resueltas',
               value: '${alerts.resolved}',
               subtitle: 'Mitigadas con éxito',
-              color: const Color(0xFF10B981),
+              color: statusColors.success,
               icon: Icons.check_circle_outline,
             ),
           ],
         ),
         const SizedBox(height: 20),
-        const Text(
+        Text(
           'Incidencias Abiertas por Tipo de Sensor (Galería)',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF0F172A),
-          ),
+          style: sectionTitleStyle,
         ),
         const SizedBox(height: 10),
-        Card(
-          elevation: 0,
-          color: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-            side: const BorderSide(color: Color(0xFFE2E8F0)),
-          ),
+        Card.outlined(
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: alerts.openBySensorType.isEmpty
-                ? const Row(
+                ? Row(
                     children: [
-                      Icon(Icons.verified_user, color: Color(0xFF10B981)),
-                      SizedBox(width: 10),
-                      Expanded(
+                      Icon(Icons.verified_user, color: statusColors.success),
+                      const SizedBox(width: 10),
+                      const Expanded(
                         child: Text(
                           'Sin incidencias abiertas por tipo de sensor en los locales monitoreados.',
-                          style: TextStyle(color: Color(0xFF334155)),
                         ),
                       ),
                     ],
@@ -257,40 +239,44 @@ class _GalleryAdminDashboardView extends StatelessWidget {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 6),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  _sensorIcon(entry.key),
-                                  color: const Color(0xFF0EA5E9),
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  _sensorLabel(entry.key),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF0F172A),
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    _sensorIcon(entry.key),
+                                    color: colorScheme.primary,
+                                    size: 20,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      _sensorLabel(entry.key),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
+                            const SizedBox(width: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 10,
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFFEE2E2),
+                                color: colorScheme.error.withValues(
+                                  alpha: 0.12,
+                                ),
                                 borderRadius: BorderRadius.circular(999),
                               ),
                               child: Text(
                                 '${entry.value} abiertas',
-                                style: const TextStyle(
-                                  color: Color(0xFFB91C1C),
+                                style: textTheme.labelMedium?.copyWith(
+                                  color: colorScheme.error,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 12,
                                 ),
                               ),
                             ),
@@ -302,13 +288,9 @@ class _GalleryAdminDashboardView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
-        const Text(
+        Text(
           'Consumo Consolidado de Suministros (Galería)',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF0F172A),
-          ),
+          style: sectionTitleStyle,
         ),
         const SizedBox(height: 10),
         Row(
@@ -319,7 +301,7 @@ class _GalleryAdminDashboardView extends StatelessWidget {
                 value: '${consumption.electricityKwh.toStringAsFixed(1)} kWh',
                 caption: 'Acumulado en medidores de galería',
                 icon: Icons.bolt,
-                accentColor: const Color(0xFFF59E0B),
+                accentColor: statusColors.warning,
               ),
             ),
             const SizedBox(width: 12),
@@ -329,7 +311,7 @@ class _GalleryAdminDashboardView extends StatelessWidget {
                 value: '${consumption.waterCubicMeters.toStringAsFixed(2)} m³',
                 caption: 'Flujo acumulado en red general',
                 icon: Icons.water_drop,
-                accentColor: const Color(0xFF0EA5E9),
+                accentColor: colorScheme.primary,
               ),
             ),
           ],
@@ -352,6 +334,13 @@ class _TenantDashboardView extends StatelessWidget {
     final alerts = summary.alerts;
     final consumption = summary.consumption;
     final hasEmergency = alerts.open > 0;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final statusColors = Theme.of(context).extension<StatusColors>()!;
+    final stateColor = hasEmergency ? colorScheme.error : statusColors.success;
+    final sectionTitleStyle = textTheme.titleMedium?.copyWith(
+      fontWeight: FontWeight.bold,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -359,24 +348,16 @@ class _TenantDashboardView extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: hasEmergency
-                ? const Color(0xFFFEF2F2)
-                : const Color(0xFFECFDF5),
+            color: stateColor.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: hasEmergency
-                  ? const Color(0xFFFECACA)
-                  : const Color(0xFFA7F3D0),
-            ),
+            border: Border.all(color: stateColor.withValues(alpha: 0.3)),
           ),
           child: Row(
             children: [
               Icon(
                 hasEmergency ? Icons.gpp_maybe : Icons.shield_outlined,
                 size: 36,
-                color: hasEmergency
-                    ? const Color(0xFFEF4444)
-                    : const Color(0xFF10B981),
+                color: stateColor,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -387,12 +368,9 @@ class _TenantDashboardView extends StatelessWidget {
                       hasEmergency
                           ? 'Atención: ${alerts.open} alerta(s) abierta(s) en tu local'
                           : 'Tu local comercial opera con normalidad',
-                      style: TextStyle(
+                      style: textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                        color: hasEmergency
-                            ? const Color(0xFF991B1B)
-                            : const Color(0xFF065F46),
+                        color: stateColor,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -400,10 +378,7 @@ class _TenantDashboardView extends StatelessWidget {
                       hasEmergency
                           ? 'Activas: ${alerts.active} · En seguimiento: ${alerts.acknowledged}'
                           : 'Sensores ambientales y de seguridad reportando en rango seguro.',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF334155),
-                      ),
+                      style: textTheme.bodySmall,
                     ),
                   ],
                 ),
@@ -412,13 +387,9 @@ class _TenantDashboardView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
-        const Text(
+        Text(
           'Consumo Acumulado de Mi Local Comercial',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF0F172A),
-          ),
+          style: sectionTitleStyle,
         ),
         const SizedBox(height: 10),
         Row(
@@ -429,7 +400,7 @@ class _TenantDashboardView extends StatelessWidget {
                 value: '${consumption.electricityKwh.toStringAsFixed(1)} kWh',
                 caption: 'Monitoreo continuo contra sobrecargas',
                 icon: Icons.electrical_services,
-                accentColor: const Color(0xFFF59E0B),
+                accentColor: statusColors.warning,
               ),
             ),
             const SizedBox(width: 12),
@@ -439,19 +410,15 @@ class _TenantDashboardView extends StatelessWidget {
                 value: '${consumption.waterCubicMeters.toStringAsFixed(2)} m³',
                 caption: 'Control preventivo de fugas nocturnas',
                 icon: Icons.plumbing,
-                accentColor: const Color(0xFF3B82F6),
+                accentColor: statusColors.info,
               ),
             ),
           ],
         ),
         const SizedBox(height: 20),
-        const Text(
+        Text(
           'Sensores de Protección en Mi Unidad Comercial',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF0F172A),
-          ),
+          style: sectionTitleStyle,
         ),
         const SizedBox(height: 10),
         _TenantSensorStatusTile(
@@ -467,7 +434,8 @@ class _TenantDashboardView extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         _TenantSensorStatusTile(
-          sensorName: 'Sensor de Apertura / Intrusión Fuera de Horario (INTRUSION)',
+          sensorName:
+              'Sensor de Apertura / Intrusión Fuera de Horario (INTRUSION)',
           openCount: alerts.openBySensorType['INTRUSION'] ?? 0,
           icon: Icons.sensor_door_outlined,
         ),
@@ -496,48 +464,38 @@ class _TenantSensorStatusTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isAlert = openCount > 0;
-    return Card(
-      elevation: 0,
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final statusColors = Theme.of(context).extension<StatusColors>()!;
+    final chipColor = isAlert ? colorScheme.error : statusColors.success;
+
+    return Card.outlined(
       margin: EdgeInsets.zero,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
-      ),
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: isAlert
-              ? const Color(0xFFFEE2E2)
-              : const Color(0xFFE0F2FE),
+              ? colorScheme.error.withValues(alpha: 0.12)
+              : colorScheme.primaryContainer,
           child: Icon(
             icon,
-            color: isAlert ? const Color(0xFFEF4444) : const Color(0xFF0EA5E9),
+            color: isAlert ? colorScheme.error : colorScheme.primary,
           ),
         ),
         title: Text(
           sensorName,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF0F172A),
-          ),
+          style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: isAlert
-                ? const Color(0xFFFEE2E2)
-                : const Color(0xFFD1FAE5),
+            color: chipColor.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(999),
           ),
           child: Text(
             isAlert ? '$openCount ALERTA' : 'NORMAL',
-            style: TextStyle(
-              fontSize: 11,
+            style: textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.bold,
-              color: isAlert
-                  ? const Color(0xFFB91C1C)
-                  : const Color(0xFF047857),
+              color: chipColor,
             ),
           ),
         ),
@@ -563,12 +521,15 @@ class _MetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -580,10 +541,9 @@ class _MetricCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
-                    fontSize: 12,
+                  style: textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF64748B),
+                    color: colorScheme.onSurfaceVariant,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -593,17 +553,15 @@ class _MetricCard extends StatelessWidget {
           ),
           Text(
             value,
-            style: TextStyle(
-              fontSize: 26,
+            style: textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
               color: color,
             ),
           ),
           Text(
             subtitle,
-            style: const TextStyle(
-              fontSize: 11,
-              color: Color(0xFF94A3B8),
+            style: textTheme.labelSmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -629,12 +587,15 @@ class _ConsumptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -647,27 +608,21 @@ class _ConsumptionCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 12,
+            style: textTheme.labelMedium?.copyWith(
               fontWeight: FontWeight.w600,
-              color: Color(0xFF64748B),
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF0F172A),
-            ),
+            style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Text(
             caption,
-            style: const TextStyle(
-              fontSize: 11,
-              color: Color(0xFF94A3B8),
+            style: textTheme.labelSmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
         ],

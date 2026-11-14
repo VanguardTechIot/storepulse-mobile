@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/di/dependency_injection.dart';
+import '../../../core/theme/status_colors.dart';
 import '../domain/payment.dart';
 import '../domain/subscription.dart';
 import '../domain/subscription_plan.dart';
@@ -11,10 +12,7 @@ import 'subscription_view_model.dart';
 class SubscriptionPage extends StatelessWidget {
   final String currentRole;
 
-  const SubscriptionPage({
-    super.key,
-    required this.currentRole,
-  });
+  const SubscriptionPage({super.key, required this.currentRole});
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +21,7 @@ class SubscriptionPage extends StatelessWidget {
       child: BlocBuilder<SubscriptionViewModel, SubscriptionState>(
         builder: (context, state) {
           if (state is SubscriptionLoading || state is SubscriptionInitial) {
-            return const Center(
-              child: CircularProgressIndicator(color: Color(0xFF0EA5E9)),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (state is SubscriptionError) {
@@ -35,18 +31,15 @@ class SubscriptionPage extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.error_outline,
                       size: 48,
-                      color: Color(0xFFEF4444),
+                      color: Theme.of(context).colorScheme.error,
                     ),
                     const SizedBox(height: 12),
-                    Text(
-                      state.message,
-                      textAlign: TextAlign.center,
-                    ),
+                    Text(state.message, textAlign: TextAlign.center),
                     const SizedBox(height: 16),
-                    ElevatedButton.icon(
+                    FilledButton.icon(
                       onPressed: () =>
                           context.read<SubscriptionViewModel>().loadData(),
                       icon: const Icon(Icons.refresh),
@@ -62,7 +55,6 @@ class SubscriptionPage extends StatelessWidget {
           final isAdmin = currentRole == 'GALLERY_ADMINISTRATOR';
 
           return RefreshIndicator(
-            color: const Color(0xFF0EA5E9),
             onRefresh: () => context.read<SubscriptionViewModel>().loadData(),
             child: ListView(
               padding: const EdgeInsets.all(16),
@@ -92,6 +84,9 @@ class _GalleryAdminSubscriptionView extends StatelessWidget {
   Widget build(BuildContext context) {
     final currentSub = loaded.currentSubscription;
     final activePlan = loaded.activePlan;
+    final sectionTitleStyle = Theme.of(
+      context,
+    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,20 +98,14 @@ class _GalleryAdminSubscriptionView extends StatelessWidget {
           onToggleRenewal: currentSub == null
               ? null
               : (enable) {
-                  context
-                      .read<SubscriptionViewModel>()
-                      .toggleAutoRenewal(currentSub.id, enable);
+                  context.read<SubscriptionViewModel>().toggleAutoRenewal(
+                    currentSub.id,
+                    enable,
+                  );
                 },
         ),
         const SizedBox(height: 20),
-        const Text(
-          'Planes Comerciales para tu Galería',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF0F172A),
-          ),
-        ),
+        Text('Planes Comerciales para tu Galería', style: sectionTitleStyle),
         const SizedBox(height: 10),
         ...loaded.plans.map(
           (plan) => Padding(
@@ -126,8 +115,7 @@ class _GalleryAdminSubscriptionView extends StatelessWidget {
               isCurrentPlan: currentSub?.planId == plan.id,
               onSelectPlan: () async {
                 final viewModel = context.read<SubscriptionViewModel>();
-                final result =
-                    await Navigator.push<SubscriptionCheckoutResult>(
+                final result = await Navigator.push<SubscriptionCheckoutResult>(
                   context,
                   MaterialPageRoute(
                     builder: (_) => SubscriptionCheckoutPage(
@@ -152,33 +140,24 @@ class _GalleryAdminSubscriptionView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        const Text(
-          'Historial de Pagos y Comprobantes',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF0F172A),
-          ),
-        ),
+        Text('Historial de Pagos y Comprobantes', style: sectionTitleStyle),
         const SizedBox(height: 10),
         if (loaded.payments.isEmpty)
-          Card(
-            elevation: 0,
-            color: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-              side: const BorderSide(color: Color(0xFFE2E8F0)),
-            ),
-            child: const Padding(
-              padding: EdgeInsets.all(16),
+          Card.outlined(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
               child: Text(
                 'Aún no se registran pagos para esta galería comercial.',
-                style: TextStyle(color: Color(0xFF64748B)),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           )
         else
-          ...loaded.payments.map((payment) => _PaymentReceiptTile(payment: payment)),
+          ...loaded.payments.map(
+            (payment) => _PaymentReceiptTile(payment: payment),
+          ),
       ],
     );
   }
@@ -195,9 +174,13 @@ class _TenantSubscriptionCoverageView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sub = loaded.currentSubscription;
-    final plan = loaded.activePlan ??
+    final plan =
+        loaded.activePlan ??
         (loaded.plans.isNotEmpty ? loaded.plans.first : null);
     final isCovered = sub == null || sub.isActive;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final statusColors = Theme.of(context).extension<StatusColors>()!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,8 +188,11 @@ class _TenantSubscriptionCoverageView extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF0F172A), Color(0xFF0369A1)],
+            gradient: LinearGradient(
+              colors: [
+                colorScheme.primaryContainer,
+                colorScheme.secondaryContainer,
+              ],
             ),
             borderRadius: BorderRadius.circular(16),
           ),
@@ -215,9 +201,9 @@ class _TenantSubscriptionCoverageView extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.verified_user,
-                    color: Color(0xFF38BDF8),
+                    color: colorScheme.primary,
                     size: 28,
                   ),
                   const SizedBox(width: 10),
@@ -226,10 +212,9 @@ class _TenantSubscriptionCoverageView extends StatelessWidget {
                       isCovered
                           ? 'COBERTURA IOT ACTIVA EN TU LOCAL'
                           : 'SUSCRIPCIÓN DE GALERÍA POR RENOVAR',
-                      style: const TextStyle(
-                        color: Color(0xFF7DD3FC),
+                      style: textTheme.labelMedium?.copyWith(
+                        color: colorScheme.primary,
                         fontWeight: FontWeight.bold,
-                        fontSize: 12,
                       ),
                     ),
                   ),
@@ -240,9 +225,8 @@ class _TenantSubscriptionCoverageView extends StatelessWidget {
                 plan != null
                     ? 'Respaldado por Plan ${plan.code} de la Galería'
                     : 'Servicio de Telemetría StorePulse',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
+                style: textTheme.titleLarge?.copyWith(
+                  color: colorScheme.onPrimaryContainer,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -251,45 +235,29 @@ class _TenantSubscriptionCoverageView extends StatelessWidget {
                 sub != null
                     ? 'Vigencia operativa: ${sub.startDate} al ${sub.endDate} · ${sub.monitoredUnitCount} locales cubiertos'
                     : 'Tu unidad comercial cuenta con supervisión preventiva de siniestros y consumo 24/7.',
-                style: const TextStyle(
-                  color: Color(0xFFE2E8F0),
-                  fontSize: 12,
+                style: textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onPrimaryContainer,
                 ),
               ),
             ],
           ),
         ),
         const SizedBox(height: 20),
-        const Text(
+        Text(
           'Alcances del Servicio Incluidos para Tu Tienda',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF0F172A),
-          ),
+          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
         if (plan != null)
           ...plan.features.map(
-            (feature) => Card(
-              elevation: 0,
+            (feature) => Card.outlined(
               margin: const EdgeInsets.only(bottom: 8),
-              color: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: const BorderSide(color: Color(0xFFE2E8F0)),
-              ),
               child: ListTile(
-                leading: const Icon(
-                  Icons.check_circle,
-                  color: Color(0xFF10B981),
-                ),
+                leading: Icon(Icons.check_circle, color: statusColors.success),
                 title: Text(
                   feature,
-                  style: const TextStyle(
-                    fontSize: 13,
+                  style: textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF0F172A),
                   ),
                 ),
               ),
@@ -299,19 +267,18 @@ class _TenantSubscriptionCoverageView extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: const Color(0xFFF1F5F9),
+            color: colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Row(
+          child: Row(
             children: [
-              Icon(Icons.info_outline, color: Color(0xFF475569)),
-              SizedBox(width: 10),
+              Icon(Icons.info_outline, color: colorScheme.onSurfaceVariant),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   'La facturación y renovación comercial del servicio IoT son gestionadas directamente por la Administración de la Galería Comercial.',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF475569),
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
@@ -338,25 +305,29 @@ class _ActiveSubscriptionBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final statusColors = Theme.of(context).extension<StatusColors>()!;
+
     if (subscription == null) {
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFFFEF3C7),
+          color: statusColors.warning.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFFDE68A)),
+          border: Border.all(
+            color: statusColors.warning.withValues(alpha: 0.4),
+          ),
         ),
         child: Row(
           children: [
-            const Icon(Icons.info_outline, color: Color(0xFFD97706)),
+            Icon(Icons.info_outline, color: statusColors.warning),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 'La Galería #$galleryId aún no tiene una suscripción activa. Selecciona un plan inferior para activarla.',
-                style: const TextStyle(
-                  color: Color(0xFF92400E),
+                style: textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  fontSize: 13,
                 ),
               ),
             ),
@@ -368,7 +339,7 @@ class _ActiveSubscriptionBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
+        color: colorScheme.primaryContainer,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -379,10 +350,9 @@ class _ActiveSubscriptionBanner extends StatelessWidget {
             children: [
               Text(
                 'GALERÍA #$galleryId · PLAN ${plan?.code ?? subscription!.planId}',
-                style: const TextStyle(
-                  color: Color(0xFF0EA5E9),
+                style: textTheme.labelMedium?.copyWith(
+                  color: colorScheme.primary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 12,
                 ),
               ),
               Container(
@@ -391,15 +361,14 @@ class _ActiveSubscriptionBanner extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF10B981).withValues(alpha: 0.2),
+                  color: statusColors.success.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
                   subscription!.status,
-                  style: const TextStyle(
-                    color: Color(0xFF34D399),
+                  style: textTheme.labelSmall?.copyWith(
+                    color: statusColors.success,
                     fontWeight: FontWeight.bold,
-                    fontSize: 11,
                   ),
                 ),
               ),
@@ -408,31 +377,30 @@ class _ActiveSubscriptionBanner extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             '${subscription!.monitoredUnitCount} locales monitoreados (${subscription!.billingCycle})',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
+            style: textTheme.titleLarge?.copyWith(
+              color: colorScheme.onPrimaryContainer,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             'Vigencia: ${subscription!.startDate} → ${subscription!.endDate}\nMedio de pago: ${subscription!.paymentMethodLabel}',
-            style: const TextStyle(
-              color: Color(0xFF94A3B8),
-              fontSize: 12,
+            style: textTheme.bodySmall?.copyWith(
+              color: colorScheme.onPrimaryContainer,
             ),
           ),
-          const Divider(color: Color(0xFF334155), height: 22),
+          const Divider(height: 22),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Renovación automática',
-                style: TextStyle(color: Colors.white, fontSize: 13),
+                style: textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onPrimaryContainer,
+                ),
               ),
               Switch(
                 value: subscription!.autoRenewal,
-                activeThumbColor: const Color(0xFF0EA5E9),
                 onChanged: onToggleRenewal,
               ),
             ],
@@ -456,15 +424,19 @@ class _PlanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final statusColors = Theme.of(context).extension<StatusColors>()!;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isCurrentPlan
-              ? const Color(0xFF0EA5E9)
-              : const Color(0xFFE2E8F0),
+              ? colorScheme.primary
+              : colorScheme.outlineVariant,
           width: isCurrentPlan ? 2 : 1,
         ),
       ),
@@ -476,18 +448,15 @@ class _PlanCard extends StatelessWidget {
             children: [
               Text(
                 'PLAN ${plan.code}',
-                style: const TextStyle(
-                  fontSize: 16,
+                style: textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF0F172A),
                 ),
               ),
               Text(
                 '${plan.currency} ${plan.monthlyPrice.toStringAsFixed(0)}/mes',
-                style: const TextStyle(
-                  fontSize: 18,
+                style: textTheme.titleLarge?.copyWith(
+                  color: colorScheme.primary,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF0EA5E9),
                 ),
               ),
             ],
@@ -495,9 +464,8 @@ class _PlanCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             '${plan.capacityLabel} · Anual: ${plan.currency} ${plan.annualPrice.toStringAsFixed(0)}',
-            style: const TextStyle(
-              fontSize: 12,
-              color: Color(0xFF64748B),
+            style: textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 10),
@@ -506,21 +474,9 @@ class _PlanCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 2),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.check,
-                    size: 16,
-                    color: Color(0xFF10B981),
-                  ),
+                  Icon(Icons.check, size: 16, color: statusColors.success),
                   const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      f,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF334155),
-                      ),
-                    ),
-                  ),
+                  Expanded(child: Text(f, style: textTheme.bodySmall)),
                 ],
               ),
             ),
@@ -528,22 +484,15 @@ class _PlanCard extends StatelessWidget {
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
-            child: OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                backgroundColor: isCurrentPlan
-                    ? const Color(0xFFE0F2FE)
-                    : const Color(0xFF0F172A),
-                foregroundColor: isCurrentPlan
-                    ? const Color(0xFF0369A1)
-                    : Colors.white,
-              ),
-              onPressed: onSelectPlan,
-              child: Text(
-                isCurrentPlan
-                    ? 'Actualizar / Renovar Plan Actual'
-                    : 'Seleccionar Plan ${plan.code}',
-              ),
-            ),
+            child: isCurrentPlan
+                ? FilledButton.tonal(
+                    onPressed: onSelectPlan,
+                    child: const Text('Actualizar / Renovar Plan Actual'),
+                  )
+                : FilledButton(
+                    onPressed: onSelectPlan,
+                    child: Text('Seleccionar Plan ${plan.code}'),
+                  ),
           ),
         ],
       ),
@@ -558,37 +507,32 @@ class _PaymentReceiptTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final statusColors = Theme.of(context).extension<StatusColors>()!;
+
+    return Card.outlined(
       margin: const EdgeInsets.only(bottom: 8),
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
-      ),
       child: ListTile(
-        leading: const CircleAvatar(
-          backgroundColor: Color(0xFFD1FAE5),
-          child: Icon(Icons.receipt_long, color: Color(0xFF047857)),
+        leading: CircleAvatar(
+          backgroundColor: statusColors.success.withValues(alpha: 0.15),
+          child: Icon(Icons.receipt_long, color: statusColors.success),
         ),
         title: Text(
           '${payment.receiptNumber} · ${payment.currency} ${payment.amount.toStringAsFixed(2)}',
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: Color(0xFF0F172A),
-          ),
+          style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         subtitle: Text(
           '${payment.methodLabel} (${payment.billingCycle})\nRef: ${payment.gatewayReference}',
-          style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+          style: textTheme.bodySmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
         ),
         trailing: Text(
           payment.status,
-          style: const TextStyle(
-            color: Color(0xFF10B981),
+          style: textTheme.labelSmall?.copyWith(
+            color: statusColors.success,
             fontWeight: FontWeight.bold,
-            fontSize: 11,
           ),
         ),
       ),
