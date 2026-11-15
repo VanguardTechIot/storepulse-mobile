@@ -56,7 +56,7 @@ class DashboardPage extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                _SegmentBanner(isGalleryAdmin: isAdmin),
+                _RoleOverviewBanner(isGalleryAdmin: isAdmin),
                 const SizedBox(height: 16),
                 if (isAdmin)
                   _GalleryAdminDashboardView(summary: loaded.summary)
@@ -71,10 +71,10 @@ class DashboardPage extends StatelessWidget {
   }
 }
 
-class _SegmentBanner extends StatelessWidget {
+class _RoleOverviewBanner extends StatelessWidget {
   final bool isGalleryAdmin;
 
-  const _SegmentBanner({required this.isGalleryAdmin});
+  const _RoleOverviewBanner({required this.isGalleryAdmin});
 
   @override
   Widget build(BuildContext context) {
@@ -112,8 +112,8 @@ class _SegmentBanner extends StatelessWidget {
               children: [
                 Text(
                   isGalleryAdmin
-                      ? 'SEGMENTO 1 · ADMINISTRADOR DE GALERÍA'
-                      : 'SEGMENTO 2 · INQUILINO DE LOCAL COMERCIAL',
+                      ? 'ADMINISTRACIÓN DE GALERÍA'
+                      : 'MI LOCAL COMERCIAL',
                   style: textTheme.labelSmall?.copyWith(
                     color: colorScheme.primary,
                     fontWeight: FontWeight.w700,
@@ -148,9 +148,6 @@ class _SegmentBanner extends StatelessWidget {
   }
 }
 
-/// ============================================================================
-/// TARGET SEGMENT 1 VIEW: COMMERCIAL GALLERY ADMINISTRATOR OR OWNER
-/// ============================================================================
 class _GalleryAdminDashboardView extends StatelessWidget {
   final DashboardSummary summary;
 
@@ -321,9 +318,6 @@ class _GalleryAdminDashboardView extends StatelessWidget {
   }
 }
 
-/// ============================================================================
-/// TARGET SEGMENT 2 VIEW: COMMERCIAL UNIT TENANT
-/// ============================================================================
 class _TenantDashboardView extends StatelessWidget {
   final DashboardSummary summary;
 
@@ -422,26 +416,25 @@ class _TenantDashboardView extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         _TenantSensorStatusTile(
-          sensorName: 'Detector de Humo e Incendio (SMOKE)',
+          sensorName: 'Detector de Humo e Incendio',
           openCount: alerts.openBySensorType['SMOKE'] ?? 0,
           icon: Icons.local_fire_department_outlined,
         ),
         const SizedBox(height: 8),
         _TenantSensorStatusTile(
-          sensorName: 'Sensor de Temperatura Ambiental (TEMPERATURE)',
+          sensorName: 'Sensor de Temperatura Ambiental',
           openCount: alerts.openBySensorType['TEMPERATURE'] ?? 0,
           icon: Icons.thermostat_outlined,
         ),
         const SizedBox(height: 8),
         _TenantSensorStatusTile(
-          sensorName:
-              'Sensor de Apertura / Intrusión Fuera de Horario (INTRUSION)',
+          sensorName: 'Sensor de Apertura e Intrusión',
           openCount: alerts.openBySensorType['INTRUSION'] ?? 0,
           icon: Icons.sensor_door_outlined,
         ),
         const SizedBox(height: 8),
         _TenantSensorStatusTile(
-          sensorName: 'Sensor de Inundación y Humedad Crítica (FLOOD)',
+          sensorName: 'Sensor de Inundación y Humedad Crítica',
           openCount: alerts.openBySensorType['FLOOD'] ?? 0,
           icon: Icons.water_damage_outlined,
         ),
@@ -653,17 +646,17 @@ IconData _sensorIcon(String type) {
 String _sensorLabel(String type) {
   switch (type.toUpperCase()) {
     case 'SMOKE':
-      return 'Humo e Incendio (SMOKE)';
+      return 'Humo e Incendio';
     case 'TEMPERATURE':
-      return 'Temperatura Crítica (TEMPERATURE)';
+      return 'Temperatura Crítica';
     case 'INTRUSION':
-      return 'Intrusión / Puerta (INTRUSION)';
+      return 'Intrusión / Puerta';
     case 'FLOOD':
-      return 'Inundación / Fuga (FLOOD)';
+      return 'Inundación / Fuga';
     case 'ELECTRICITY':
-      return 'Anomalía Eléctrica (ELECTRICITY)';
+      return 'Anomalía Eléctrica';
     case 'WATER':
-      return 'Flujo de Agua (WATER)';
+      return 'Flujo de Agua';
     default:
       return type;
   }
