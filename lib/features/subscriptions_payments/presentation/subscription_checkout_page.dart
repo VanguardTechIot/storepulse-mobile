@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 import '../domain/subscription_plan.dart';
 import '../../../core/theme/status_colors.dart';
 
+String _planLabel(String code) => switch (code.toUpperCase()) {
+  'BASIC' => 'Basic',
+  'COMMERCIAL' => 'Commercial',
+  'CORPORATE' => 'Corporate',
+  _ => code,
+};
+
 class SubscriptionCheckoutResult {
   final int galleryId;
   final int monitoredUnitCount;
@@ -74,9 +81,10 @@ class _SubscriptionCheckoutPageState extends State<SubscriptionCheckoutPage> {
     final sectionTitleStyle = textTheme.titleSmall?.copyWith(
       fontWeight: FontWeight.bold,
     );
+    final planName = _planLabel(widget.plan.code);
 
     return Scaffold(
-      appBar: AppBar(title: Text('Contratar Plan ${widget.plan.code}')),
+      appBar: AppBar(title: Text('Contratar Plan $planName')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -92,7 +100,7 @@ class _SubscriptionCheckoutPageState extends State<SubscriptionCheckoutPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'PLAN ${widget.plan.code}',
+                    'Plan $planName',
                     style: textTheme.labelLarge?.copyWith(
                       color: colorScheme.primary,
                       fontWeight: FontWeight.bold,

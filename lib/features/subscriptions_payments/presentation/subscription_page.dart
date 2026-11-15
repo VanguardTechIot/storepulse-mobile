@@ -9,6 +9,59 @@ import 'subscription_checkout_page.dart';
 import 'subscription_state.dart';
 import 'subscription_view_model.dart';
 
+String _humanizeCode(String value) => value
+    .trim()
+    .split(RegExp(r'[_\s]+'))
+    .where((part) => part.isNotEmpty)
+    .map(
+      (word) =>
+          '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}',
+    )
+    .join(' ');
+
+String _planLabel(String code) => switch (code.toUpperCase()) {
+  'BASIC' => 'Basic',
+  'COMMERCIAL' => 'Commercial',
+  'CORPORATE' => 'Corporate',
+  _ => _humanizeCode(code),
+};
+
+String _featureLabel(String feature) => switch (feature.toLowerCase()) {
+  'security_incidents' => 'Security & Incidents',
+  'energy_submetering' => 'Energy Submetering',
+  'notification_center' => 'Notification Center',
+  'everything_basic' => 'Everything in Basic',
+  'water_telemetry' => 'Water Telemetry',
+  'billing_per_unit' => 'Billing per Unit',
+  'tenant_communication' => 'Tenant Communication',
+  'everything_commercial' => 'Everything in Commercial',
+  'multiple_galleries' => 'Multiple Galleries',
+  'advanced_reports' => 'Advanced Reports',
+  _ => feature.contains('_') ? _humanizeCode(feature) : feature,
+};
+
+String _subscriptionStatusLabel(String status) =>
+    switch (status.toUpperCase()) {
+      'ACTIVE' => 'Active',
+      'PENDING_PAYMENT' || 'PENDING' => 'Pending Payment',
+      'CANCELLED' => 'Cancelled',
+      'EXPIRED' => 'Expired',
+      _ => _humanizeCode(status),
+    };
+
+String _billingCycleLabel(String cycle) => switch (cycle.toUpperCase()) {
+  'MONTHLY' => 'Monthly',
+  'ANNUAL' => 'Annual',
+  _ => _humanizeCode(cycle),
+};
+
+String _paymentStatusLabel(String status) => switch (status.toUpperCase()) {
+  'ACCEPTED' => 'Accepted',
+  'PENDING' => 'Pending',
+  'REJECTED' => 'Rejected',
+  _ => _humanizeCode(status),
+};
+
 class SubscriptionPage extends StatelessWidget {
   final String currentRole;
 
@@ -72,9 +125,6 @@ class SubscriptionPage extends StatelessWidget {
   }
 }
 
-/// ============================================================================
-/// TARGET SEGMENT 1 VIEW: GALLERY ADMINISTRATOR (SUBSCRIPTION MANAGEMENT)
-/// ============================================================================
 class _GalleryAdminSubscriptionView extends StatelessWidget {
   final SubscriptionLoaded loaded;
 
@@ -163,9 +213,6 @@ class _GalleryAdminSubscriptionView extends StatelessWidget {
   }
 }
 
-/// ============================================================================
-/// TARGET SEGMENT 2 VIEW: COMMERCIAL UNIT TENANT (SERVICE COVERAGE)
-/// ============================================================================
 class _TenantSubscriptionCoverageView extends StatelessWidget {
   final SubscriptionLoaded loaded;
 
@@ -223,7 +270,7 @@ class _TenantSubscriptionCoverageView extends StatelessWidget {
               const SizedBox(height: 10),
               Text(
                 sub != null && activePlan != null
-                    ? 'Respaldado por Plan ${activePlan.code} de la Galería'
+                    ? 'Respaldado por Plan ${_planLabel(activePlan.code)} de la Galería'
                     : 'Servicio de Telemetría StorePulse',
                 style: textTheme.titleLarge?.copyWith(
                   color: colorScheme.onPrimaryContainer,
@@ -255,7 +302,7 @@ class _TenantSubscriptionCoverageView extends StatelessWidget {
               child: ListTile(
                 leading: Icon(Icons.check_circle, color: statusColors.success),
                 title: Text(
-                  feature,
+                  _featureLabel(feature),
                   style: textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -325,7 +372,7 @@ class _ActiveSubscriptionBanner extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'La Galería #$galleryId aún no tiene una suscripción activa. Selecciona un plan inferior para activarla.',
+                'Tu galería aún no tiene una suscripción activa. Selecciona un plan inferior para activarla.',
                 style: textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -335,6 +382,10 @@ class _ActiveSubscriptionBanner extends StatelessWidget {
         ),
       );
     }
+
+    final statusColor = subscription!.isActive
+        ? statusColors.success
+        : statusColors.warning;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -349,7 +400,9 @@ class _ActiveSubscriptionBanner extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'GALERÍA #$galleryId · PLAN ${plan?.code ?? subscription!.planId}',
+                plan != null
+                    ? 'Galería #$galleryId · Plan ${_planLabel(plan!.code)}'
+                    : 'Galería #$galleryId · Plan #${subscription!.planId}',
                 style: textTheme.labelMedium?.copyWith(
                   color: colorScheme.primary,
                   fontWeight: FontWeight.bold,
@@ -361,13 +414,13 @@ class _ActiveSubscriptionBanner extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: statusColors.success.withValues(alpha: 0.2),
+                  color: statusColor.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
-                  subscription!.status,
+                  _subscriptionStatusLabel(subscription!.status),
                   style: textTheme.labelSmall?.copyWith(
-                    color: statusColors.success,
+                    color: statusColor,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -376,7 +429,7 @@ class _ActiveSubscriptionBanner extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '${subscription!.monitoredUnitCount} locales monitoreados (${subscription!.billingCycle})',
+            '${subscription!.monitoredUnitCount} locales monitoreados (${_billingCycleLabel(subscription!.billingCycle)})',
             style: textTheme.titleLarge?.copyWith(
               color: colorScheme.onPrimaryContainer,
               fontWeight: FontWeight.bold,
@@ -427,6 +480,7 @@ class _PlanCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final statusColors = Theme.of(context).extension<StatusColors>()!;
+    final planName = _planLabel(plan.code);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -447,7 +501,7 @@ class _PlanCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'PLAN ${plan.code}',
+                'Plan $planName',
                 style: textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -476,7 +530,9 @@ class _PlanCard extends StatelessWidget {
                 children: [
                   Icon(Icons.check, size: 16, color: statusColors.success),
                   const SizedBox(width: 6),
-                  Expanded(child: Text(f, style: textTheme.bodySmall)),
+                  Expanded(
+                    child: Text(_featureLabel(f), style: textTheme.bodySmall),
+                  ),
                 ],
               ),
             ),
@@ -491,7 +547,7 @@ class _PlanCard extends StatelessWidget {
                   )
                 : FilledButton(
                     onPressed: onSelectPlan,
-                    child: Text('Seleccionar Plan ${plan.code}'),
+                    child: Text('Seleccionar Plan $planName'),
                   ),
           ),
         ],
@@ -510,28 +566,33 @@ class _PaymentReceiptTile extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final statusColors = Theme.of(context).extension<StatusColors>()!;
+    final statusColor = switch (payment.status.toUpperCase()) {
+      'ACCEPTED' => statusColors.success,
+      'PENDING' => statusColors.warning,
+      _ => colorScheme.error,
+    };
 
     return Card.outlined(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: statusColors.success.withValues(alpha: 0.15),
-          child: Icon(Icons.receipt_long, color: statusColors.success),
+          backgroundColor: statusColor.withValues(alpha: 0.15),
+          child: Icon(Icons.receipt_long, color: statusColor),
         ),
         title: Text(
           '${payment.receiptNumber} · ${payment.currency} ${payment.amount.toStringAsFixed(2)}',
           style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         subtitle: Text(
-          '${payment.methodLabel} (${payment.billingCycle})\nRef: ${payment.gatewayReference}',
+          '${payment.methodLabel} (${_billingCycleLabel(payment.billingCycle)})\nRef: ${payment.gatewayReference}',
           style: textTheme.bodySmall?.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),
         ),
         trailing: Text(
-          payment.status,
+          _paymentStatusLabel(payment.status),
           style: textTheme.labelSmall?.copyWith(
-            color: statusColors.success,
+            color: statusColor,
             fontWeight: FontWeight.bold,
           ),
         ),
