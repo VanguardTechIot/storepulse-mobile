@@ -91,8 +91,8 @@ class _MainPageState extends State<MainPage> {
                   ),
                   Text(
                     isAdmin
-                        ? 'Segmento 1: Administrador de Galería'
-                        : 'Segmento 2: Inquilino de Local Comercial',
+                        ? 'Administrador de Galería'
+                        : 'Inquilino de Local Comercial',
                     overflow: TextOverflow.ellipsis,
                     style: textTheme.labelSmall?.copyWith(
                       color: colorScheme.primary,
