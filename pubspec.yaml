@@ -1,7 +1,7 @@
 name: storepulse_mobile
 description: "StorePulse IoT Mobile Application - Dashboard Analytics & Subscriptions Payments"
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.0+2
 
 environment:
   sdk: ^3.12.2
